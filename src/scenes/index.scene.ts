@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import GamePlayer from '../objects/player.object'; // Import the GamePlayer class
 
 interface SceneOptions {
   backgroundColor?: number; 
@@ -13,6 +14,7 @@ export default class GameScene {
   public scene: THREE.Scene;
   public camera: THREE.PerspectiveCamera;
   public renderer: THREE.WebGLRenderer;
+  private player: GamePlayer | null = null; // Add a reference to the player
 
   constructor(options: SceneOptions = {}) {
     const {
@@ -38,6 +40,11 @@ export default class GameScene {
     document.body.appendChild(this.renderer.domElement);
   }
 
+  public setPlayer(player: GamePlayer) {
+    this.player = player;
+    this.scene.add(this.player.getMesh());
+  }
+
   private addLights() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     this.scene.add(ambientLight);
@@ -59,6 +66,12 @@ export default class GameScene {
   }
 
   public render = () => {
+    if (this.player) {
+      const playerPosition = this.player.getMesh().position;
+      this.camera.position.set(playerPosition.x, playerPosition.y + 5, playerPosition.z + 10);
+      this.camera.lookAt(playerPosition);
+    }
+
     this.renderer.render(this.scene, this.camera);
   };
 }

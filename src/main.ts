@@ -40,7 +40,7 @@ export default class Game {
     this.gameScene.scene.add(this.ground.getMesh());
 
     this.player = new GamePlayer();
-    this.gameScene.scene.add(this.player.getMesh());
+    this.gameScene.setPlayer(this.player); // Set the player in the GameScene
 
     this.coin = new Coin({
       color: 0x0000ff,
@@ -61,7 +61,7 @@ export default class Game {
   }
 
   private handlePlayerControls() {
-    const speed = 0.1;
+    const speed = 0.40;
 
     if (this.keyStates["ArrowUp"]) {
       this.player.move(new THREE.Vector3(0, 0, -speed));

@@ -37,7 +37,7 @@ export default class GamePlayer {
 
   public jump() {
     if (this.isOnGround) {
-      this.velocity.y = 0.2; 
+      this.velocity.y = 0.40; 
       this.isOnGround = false;
     }
   }

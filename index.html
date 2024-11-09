@@ -5,10 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Vite + TS</title>
+    <title>Maze Runner Game</title>
   </head>
   <body>
-    <div id="app" class="max-h-screen max-w-screen"></div>
+    <div id="app" class="max-h-screen max-w-screen relative select-none">
+      <div id="game-metix"></div>
+      <!-- <div class="bg-slate-800 p-5 absolute shadow-lg z-50 right-5 top-5 rounded-lg text-slate-300 text-xl flex flex-col gap-3">
+        <div class="flex gap-2 items-center text-slate-300 text-xl" id="metrix-1">
+          <p>Points: </p>
+          <div class="w-28">
+            <p>0000</p>
+          </div>
+        </div>
+      </div> -->
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

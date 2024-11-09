@@ -1,8 +1,12 @@
+// src/main.ts
+import './style.css';
 import * as THREE from 'three';
 import GamePlayer from './objects/player.object';
 import Coin from './objects/coin.object';
 import GameScene from './scenes/index.scene';
 import GroundPlane from './objects/ground.object';
+import { getRandomNumber } from './utils/random.utils';
+import { CreateGameStatusComponent } from './ui/components/game-status.component';
 
 export default class Game {
   private gameScene: GameScene;
@@ -10,8 +14,11 @@ export default class Game {
   private ground: GroundPlane;
   private coin: Coin;
   private keyStates: { [key: string]: boolean } = {};
+  private gameMetricsElement: HTMLElement | null;
 
   constructor() {
+    this.gameMetricsElement = document.querySelector('#game-metix');
+
     this.gameScene = new GameScene({
       backgroundColor: 0x87ceeb,
       fov: 75,
@@ -22,7 +29,7 @@ export default class Game {
 
     this.ground = new GroundPlane({
       color: 0x228b22,
-      width: 100,
+      width: 40,
       height: 100,
       position: new THREE.Vector3(0, 0, 0),
     });
@@ -34,10 +41,17 @@ export default class Game {
     this.coin = new Coin({
       color: 0x0000ff,
       size: 1,
-      position: new THREE.Vector3(2, 1, 0),
+      mesh: this.ground.getMesh(),
+      numCoins: getRandomNumber(50, 100),
     });
-    this.gameScene.scene.add(this.coin.getMesh());
 
+    this.coin.getMeshes().forEach(coinMesh => {
+      this.gameScene.scene.add(coinMesh);
+    });
+
+    CreateGameStatusComponent(this.gameMetricsElement);
+
+   
     this.setupControls();
     this.animate();
   }
@@ -73,10 +87,15 @@ export default class Game {
   }
 
   private animate = () => {
+    const deltaTime = 0.0091;
+
     requestAnimationFrame(this.animate);
 
     this.handlePlayerControls();
     this.player.update();
+
+    this.coin.animateCoins(deltaTime);
+
     this.gameScene.render();
   };
 }

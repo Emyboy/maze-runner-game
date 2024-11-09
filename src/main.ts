@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 import GamePlayer from './objects/player.object';
+import Coin from './objects/coin.object';
 import GameScene from './scenes/index.scene';
+import GroundPlane from './objects/ground.object';
 
 export default class Game {
   private gameScene: GameScene;
   private player: GamePlayer;
-  private ground!: THREE.Mesh;
-  private cube!: THREE.Mesh;
+  private ground: GroundPlane;
+  private coin: Coin;
+  private keyStates: { [key: string]: boolean } = {};
 
   constructor() {
     this.gameScene = new GameScene({
@@ -17,45 +20,64 @@ export default class Game {
       position: new THREE.Vector3(0, 5, 10),
     });
 
-    this.addLights();
-    this.createGround();
+    this.ground = new GroundPlane({
+      color: 0x228b22,
+      width: 100,
+      height: 100,
+      position: new THREE.Vector3(0, 0, 0),
+    });
+    this.gameScene.scene.add(this.ground.getMesh());
 
     this.player = new GamePlayer();
     this.gameScene.scene.add(this.player.getMesh());
 
-    this.createCube();
+    this.coin = new Coin({
+      color: 0x0000ff,
+      size: 1,
+      position: new THREE.Vector3(2, 1, 0),
+    });
+    this.gameScene.scene.add(this.coin.getMesh());
+
+    this.setupControls();
     this.animate();
   }
 
-  private addLights() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    this.gameScene.scene.add(ambientLight);
+  private handlePlayerControls() {
+    const speed = 0.1;
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 10, 10);
-    this.gameScene.scene.add(directionalLight);
+    if (this.keyStates['ArrowUp']) {
+      this.player.move(new THREE.Vector3(0, 0, -speed));
+    }
+    if (this.keyStates['ArrowDown']) {
+      this.player.move(new THREE.Vector3(0, 0, speed));
+    }
+    if (this.keyStates['ArrowLeft']) {
+      this.player.move(new THREE.Vector3(-speed, 0, 0));
+    }
+    if (this.keyStates['ArrowRight']) {
+      this.player.move(new THREE.Vector3(speed, 0, 0));
+    }
+    if (this.keyStates[' ']) {
+      this.player.jump();
+    }
   }
 
-  private createGround() {
-    const geometry = new THREE.PlaneGeometry(100, 100);
-    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-    this.ground = new THREE.Mesh(geometry, material);
-    this.ground.rotation.x = -Math.PI / 2;
-    this.ground.position.y = 0;
-    this.gameScene.scene.add(this.ground);
-  }
+  private setupControls() {
+    window.addEventListener('keydown', (event) => {
+      this.keyStates[event.key] = true;
+    });
 
-  private createCube() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-    this.cube = new THREE.Mesh(geometry, material);
-    this.cube.position.set(2, 1, 0);
-    this.gameScene.scene.add(this.cube);
+    window.addEventListener('keyup', (event) => {
+      this.keyStates[event.key] = false;
+    });
   }
 
   private animate = () => {
     requestAnimationFrame(this.animate);
-    this.gameScene.render(); 
+
+    this.handlePlayerControls();
+    this.player.update();
+    this.gameScene.render();
   };
 }
 

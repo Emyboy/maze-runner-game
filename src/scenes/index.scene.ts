@@ -27,6 +27,8 @@ export default class GameScene {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(backgroundColor);
 
+    this.addLights();
+
     this.camera = new THREE.PerspectiveCamera(fov, aspectRatio, near, far);
     this.camera.position.copy(position);
     this.camera.lookAt(0, 0, 0);
@@ -34,6 +36,15 @@ export default class GameScene {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
+  }
+
+  private addLights() {
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 10, 10);
+    this.scene.add(directionalLight);
   }
 
   public addSkyBox(texturePaths: string[]) {

@@ -1,112 +1,62 @@
-// src/main.ts
-
-import './style.css';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import { CarController } from './controllers/cube.controller';
+import GamePlayer from './objects/player.object';
+import GameScene from './scenes/index.scene';
 
-class GameApp {
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
-  private carController?: CarController;
+export default class Game {
+  private gameScene: GameScene;
+  private player: GamePlayer;
+  private ground!: THREE.Mesh;
+  private cube!: THREE.Mesh;
 
   constructor() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x87ceeb);
+    this.gameScene = new GameScene({
+      backgroundColor: 0x87ceeb,
+      fov: 75,
+      near: 0.1,
+      far: 1000,
+      position: new THREE.Vector3(0, 5, 10),
+    });
 
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(0, 8, 30);
+    this.addLights();
+    this.createGround();
 
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    this.player = new GamePlayer();
+    this.gameScene.scene.add(this.player.getMesh());
 
-    this.addLighting();
-    this.addPlane();
-    this.loadCarModel();
-    this.setupEventListeners();
-
+    this.createCube();
     this.animate();
   }
 
-  // Add lighting (HDR image-based)
-  private addLighting() {
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load(
-      '/hdr/sky.hdr', // HDR file path
-      (texture) => {
-        texture.mapping = THREE.EquirectangularReflectionMapping;
-        this.scene.background = texture;
-        this.scene.environment = texture;
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading HDR image:', error);
-      }
-    );
+  private addLights() {
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.gameScene.scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(10, 10, 10);
+    this.gameScene.scene.add(directionalLight);
   }
 
-  // Add ground plane with texture
-  private addPlane() {
-    const textureLoader = new THREE.TextureLoader();
-    const groundTexture = textureLoader.load('/textures/rock.jpg'); // Load the texture
-    groundTexture.wrapS = THREE.RepeatWrapping; // Repeat texture horizontally
-    groundTexture.wrapT = THREE.RepeatWrapping; // Repeat texture vertically
-    groundTexture.repeat.set(4, 4); // Repeat the texture 4 times in each direction
-
-    const planeGeometry = new THREE.PlaneGeometry(80, 80);
-    const planeMaterial = new THREE.MeshStandardMaterial({ map: groundTexture });
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -Math.PI / 2;
-    this.scene.add(plane);
+  private createGround() {
+    const geometry = new THREE.PlaneGeometry(100, 100);
+    const material = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+    this.ground = new THREE.Mesh(geometry, material);
+    this.ground.rotation.x = -Math.PI / 2;
+    this.ground.position.y = 0;
+    this.gameScene.scene.add(this.ground);
   }
 
-  // Load the car model and initialize the CarController
-  private loadCarModel() {
-    const loader = new GLTFLoader();
-    loader.load(
-      '/models/car.glb',
-      (gltf) => {
-        const carMesh = gltf.scene as any;
-        carMesh.position.set(0, 0.5, 0);
-        this.scene.add(carMesh);
-
-        this.carController = new CarController(carMesh);
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading car model:', error);
-      }
-    );
+  private createCube() {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+    this.cube = new THREE.Mesh(geometry, material);
+    this.cube.position.set(2, 1, 0);
+    this.gameScene.scene.add(this.cube);
   }
 
-  // Setup event listeners for window resize and keyboard controls
-  private setupEventListeners() {
-    window.addEventListener('resize', () => this.onWindowResize());
-    window.addEventListener('keydown', (event) => this.carController?.onKeyDown(event));
-    window.addEventListener('keyup', (event) => this.carController?.onKeyUp(event));
-  }
-
-  // Handle window resizing
-  private onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  // Animation loop
-  private animate() {
-    requestAnimationFrame(() => this.animate());
-
-    if (this.carController) {
-      this.carController.updatePosition();
-    }
-
-    this.renderer.render(this.scene, this.camera);
-  }
+  private animate = () => {
+    requestAnimationFrame(this.animate);
+    this.gameScene.render(); 
+  };
 }
 
-// Instantiate the GameApp
-new GameApp();
+new Game();

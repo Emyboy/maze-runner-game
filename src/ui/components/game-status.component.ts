@@ -6,20 +6,20 @@ export const CreateGameStatusComponent = (parent: HTMLElement | null) => {
 
     const scoreMetric = new GameMetrics({
         id: 'score-metric',
-        label: 'Score',
+        label: 'Score:',
         parentElement: parent,
         value: '0',
     });
 
     const distanceMetric = new GameMetrics({
         id: 'distance-metric',
-        label: 'Distance',
+        label: 'Distance:',
         parentElement: parent,
         value: '0',
     });
     
     const scoreCard = new Card({
-        classNames: 'w-64', 
+        classNames: 'absolute top-5 right-5', 
         children: [], 
         id: 'score-card', 
     }).render();

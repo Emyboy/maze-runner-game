@@ -21,7 +21,7 @@ export default class Card {
 
         card.setAttribute('id', this.id);
         card.className =
-            `bg-slate-800 p-5 absolute shadow-lg z-50 right-5 top-5 rounded-lg text-slate-300 text-xl flex flex-col gap-3 ${this.classNames}`;
+            `bg-slate-800 p-5 shadow-lg z-50 rounded-lg text-slate-300 text-xl flex flex-col gap-3 ${this.classNames}`;
 
         this.children.forEach(child => card.appendChild(child));
 

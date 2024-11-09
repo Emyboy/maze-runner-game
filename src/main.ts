@@ -1,12 +1,14 @@
 // src/main.ts
-import './style.css';
-import * as THREE from 'three';
-import GamePlayer from './objects/player.object';
-import Coin from './objects/coin.object';
-import GameScene from './scenes/index.scene';
-import GroundPlane from './objects/ground.object';
-import { getRandomNumber } from './utils/random.utils';
-import { CreateGameStatusComponent } from './ui/components/game-status.component';
+import "./style.css";
+import * as THREE from "three";
+import GamePlayer from "./objects/player.object";
+import Coin from "./objects/coin.object";
+import GameScene from "./scenes/index.scene";
+import GroundPlane from "./objects/ground.object";
+import { getRandomNumber } from "./utils/random.utils";
+import { CreateGameStatusComponent } from "./ui/components/game-status.component";
+import { CreateGameLeaderBoard } from "./ui/components/game-leaderboard.component";
+import { players } from "./__mock__/player.mock";
 
 export default class Game {
   private gameScene: GameScene;
@@ -15,9 +17,11 @@ export default class Game {
   private coin: Coin;
   private keyStates: { [key: string]: boolean } = {};
   private gameMetricsElement: HTMLElement | null;
+  private leaderBoardElement: HTMLElement | null;
 
   constructor() {
-    this.gameMetricsElement = document.querySelector('#game-metix');
+    this.gameMetricsElement = document.querySelector("#game-metrics");
+    this.leaderBoardElement = document.querySelector("#leader-board");
 
     this.gameScene = new GameScene({
       backgroundColor: 0x87ceeb,
@@ -45,13 +49,13 @@ export default class Game {
       numCoins: getRandomNumber(50, 100),
     });
 
-    this.coin.getMeshes().forEach(coinMesh => {
+    this.coin.getMeshes().forEach((coinMesh) => {
       this.gameScene.scene.add(coinMesh);
     });
 
+    CreateGameLeaderBoard({ parent: this.leaderBoardElement, players });
     CreateGameStatusComponent(this.gameMetricsElement);
 
-   
     this.setupControls();
     this.animate();
   }
@@ -59,29 +63,29 @@ export default class Game {
   private handlePlayerControls() {
     const speed = 0.1;
 
-    if (this.keyStates['ArrowUp']) {
+    if (this.keyStates["ArrowUp"]) {
       this.player.move(new THREE.Vector3(0, 0, -speed));
     }
-    if (this.keyStates['ArrowDown']) {
+    if (this.keyStates["ArrowDown"]) {
       this.player.move(new THREE.Vector3(0, 0, speed));
     }
-    if (this.keyStates['ArrowLeft']) {
+    if (this.keyStates["ArrowLeft"]) {
       this.player.move(new THREE.Vector3(-speed, 0, 0));
     }
-    if (this.keyStates['ArrowRight']) {
+    if (this.keyStates["ArrowRight"]) {
       this.player.move(new THREE.Vector3(speed, 0, 0));
     }
-    if (this.keyStates[' ']) {
+    if (this.keyStates[" "]) {
       this.player.jump();
     }
   }
 
   private setupControls() {
-    window.addEventListener('keydown', (event) => {
+    window.addEventListener("keydown", (event) => {
       this.keyStates[event.key] = true;
     });
 
-    window.addEventListener('keyup', (event) => {
+    window.addEventListener("keyup", (event) => {
       this.keyStates[event.key] = false;
     });
   }

@@ -8,15 +8,12 @@ interface GroundOptions {
   position?: THREE.Vector3;
 }
 
-/**
- * @description for creating a ground plane
- */
 export default class GroundPlane {
   private mesh: THREE.Mesh;
 
   constructor(options: GroundOptions = {}) {
     const color = options.color || 0x228b22;
-    const width = options.width || 100;
+    const width = options.width || 40;
     const height = options.height || 100;
     const position = options.position || new THREE.Vector3(0, 0, 0);
 
@@ -24,8 +21,9 @@ export default class GroundPlane {
     const material = new THREE.MeshStandardMaterial({ color });
 
     this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.position.copy(position);
+    this.mesh.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
+    this.mesh.receiveShadow = true; // Enable receiving shadows
   }
 
   public getMesh(): THREE.Mesh {

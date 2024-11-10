@@ -1,3 +1,4 @@
+// src/objects/player.object.ts
 import * as THREE from 'three';
 
 interface PlayerOptions {
@@ -22,6 +23,8 @@ export default class GamePlayer {
 
     this.mesh = new THREE.Mesh(geometry, material);
     this.mesh.position.copy(position);
+    this.mesh.castShadow = true; // Enable casting shadows
+    this.mesh.receiveShadow = true; // Enable receiving shadows
 
     this.velocity = new THREE.Vector3(0, 0, 0);
     this.isOnGround = true;
@@ -39,6 +42,13 @@ export default class GamePlayer {
     if (this.isOnGround) {
       this.velocity.y = 0.40; 
       this.isOnGround = false;
+    }
+  }
+
+  public rotateToFace(direction: THREE.Vector3) {
+    if (direction.length() > 0) {
+      const angle = Math.atan2(direction.x, direction.z);
+      this.mesh.rotation.y = angle;
     }
   }
 

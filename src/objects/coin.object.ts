@@ -23,6 +23,8 @@ export default class Coin {
       const material = new THREE.MeshStandardMaterial({ color });
       const coinMesh = new THREE.Mesh(geometry, material);
       coinMesh.position.copy(position);
+      coinMesh.castShadow = true; // Enable casting shadows
+      coinMesh.receiveShadow = true; // Enable receiving shadows
       this.coinMeshes.push(coinMesh);
     }
   }
@@ -41,6 +43,8 @@ export default class Coin {
       const material = new THREE.MeshStandardMaterial({ color });
       const coinMesh = new THREE.Mesh(geometry, material);
       coinMesh.position.set(x, y, z);
+      coinMesh.castShadow = true; // Enable casting shadows
+      coinMesh.receiveShadow = true; // Enable receiving shadows
 
       const floatSpeed = getRandomNumber(0.02, 0.05);
       const rotationSpeed = getRandomNumber(0.01, 0.03);

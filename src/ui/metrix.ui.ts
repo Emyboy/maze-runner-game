@@ -28,6 +28,7 @@ export default class GameMetrics {
         labelParagraph.textContent = this.label;
 
         const valueContainer = document.createElement("div");
+        valueContainer.setAttribute("id", `${this.id}-value`);
         valueContainer.className = "w-28";
 
         const valueParagraph = document.createElement("p");

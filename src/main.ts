@@ -6,7 +6,7 @@ import Coin from "./objects/coin.object";
 import GameScene from "./scenes/index.scene";
 import GroundPlane from "./objects/ground.object";
 import { getRandomNumber } from "./utils/random.utils";
-import { CreateGameStatusComponent } from "./ui/components/game-status.component";
+import { GameStatusComponent } from "./ui/components/game-status.component";
 import { CreateGameLeaderBoard } from "./ui/components/game-leaderboard.component";
 import { players } from "./__mock__/player.mock";
 
@@ -18,6 +18,8 @@ export default class Game {
   private keyStates: { [key: string]: boolean } = {};
   private gameMetricsElement: HTMLElement | null;
   private leaderBoardElement: HTMLElement | null;
+  private gameMetrics: GameStatusComponent;
+  private score: number = 0;
 
   constructor() {
     this.gameMetricsElement = document.querySelector("#game-metrics");
@@ -54,30 +56,73 @@ export default class Game {
     });
 
     CreateGameLeaderBoard({ parent: this.leaderBoardElement, players });
-    CreateGameStatusComponent(this.gameMetricsElement);
+    this.gameMetrics = new GameStatusComponent(this.gameMetricsElement as HTMLElement);
 
     this.setupControls();
     this.animate();
   }
 
   private handlePlayerControls() {
-    const speed = 0.40;
+    if (!this.player) return;
 
-    if (this.keyStates["ArrowUp"]) {
-      this.player.move(new THREE.Vector3(0, 0, -speed));
+    const speed = 0.40;
+    const movement = new THREE.Vector3();
+
+    const cameraDirection = this.gameScene.getCameraDirection();
+    const cameraForward = new THREE.Vector3(
+      cameraDirection.x,
+      0,
+      cameraDirection.z
+    ).normalize();
+    const cameraRight = new THREE.Vector3(
+      cameraForward.z,
+      0,
+      -cameraForward.x
+    );
+
+    // Calculate movement based on camera orientation
+    if (this.keyStates["ArrowUp"] || this.keyStates["w"]) {
+      movement.add(cameraForward.multiplyScalar(speed));
     }
-    if (this.keyStates["ArrowDown"]) {
-      this.player.move(new THREE.Vector3(0, 0, speed));
+    if (this.keyStates["ArrowDown"] || this.keyStates["s"]) {
+      movement.add(cameraForward.multiplyScalar(-speed));
     }
-    if (this.keyStates["ArrowLeft"]) {
-      this.player.move(new THREE.Vector3(-speed, 0, 0));
+    if (this.keyStates["ArrowLeft"] || this.keyStates["a"]) {
+      movement.add(cameraRight.multiplyScalar(speed));
     }
-    if (this.keyStates["ArrowRight"]) {
-      this.player.move(new THREE.Vector3(speed, 0, 0));
+    if (this.keyStates["ArrowRight"] || this.keyStates["d"]) {
+      movement.add(cameraRight.multiplyScalar(-speed));
     }
+
+    // Normalize movement to maintain consistent speed
+    if (movement.length() > 0) {
+      movement.normalize().multiplyScalar(speed);
+      
+      // Optional: Rotate player mesh to face movement direction
+      if (movement.length() > 0) {
+        const angle = Math.atan2(movement.x, movement.z);
+        this.player.getMesh().rotation.y = angle;
+      }
+      
+      this.player.move(movement);
+    }
+
     if (this.keyStates[" "]) {
       this.player.jump();
     }
+  }
+
+  private checkCollisions() {
+    const playerPosition = this.player.getMesh().position;
+    this.coin.getMeshes().forEach((coinMesh, index) => {
+      const distance = playerPosition.distanceTo(coinMesh.position);
+      if (distance < 1) {
+        this.gameScene.scene.remove(coinMesh);
+        this.coin.getMeshes().splice(index, 1);
+        this.score++;
+        this.gameMetrics.updateScore(this.score.toString());
+      }
+    });
   }
 
   private setupControls() {
@@ -99,7 +144,9 @@ export default class Game {
     this.player.update();
 
     this.coin.animateCoins(deltaTime);
+    this.checkCollisions();
 
+    this.gameScene.updateCamera(); // Update the camera position
     this.gameScene.render();
   };
 }

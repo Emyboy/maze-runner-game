@@ -41,12 +41,14 @@ export default class Game {
     });
     this.gameScene.scene.add(this.ground.getMesh());
 
-    this.player = new GamePlayer();
+    this.player = new GamePlayer({
+      color: 0x000080,
+    });
     this.gameScene.setPlayer(this.player); // Set the player in the GameScene
 
     this.coin = new Coin({
-      color: 0x0000ff,
-      size: 1,
+      color: 0xffd700,
+      size: 0.40,
       mesh: this.ground.getMesh(),
       numCoins: getRandomNumber(50, 100),
     });
@@ -80,7 +82,6 @@ export default class Game {
       -cameraForward.x
     );
 
-    // Calculate movement based on camera orientation
     if (this.keyStates["ArrowUp"] || this.keyStates["w"]) {
       movement.add(cameraForward.multiplyScalar(speed));
     }
@@ -94,11 +95,9 @@ export default class Game {
       movement.add(cameraRight.multiplyScalar(-speed));
     }
 
-    // Normalize movement to maintain consistent speed
     if (movement.length() > 0) {
       movement.normalize().multiplyScalar(speed);
       
-      // Optional: Rotate player mesh to face movement direction
       if (movement.length() > 0) {
         const angle = Math.atan2(movement.x, movement.z);
         this.player.getMesh().rotation.y = angle;
@@ -146,7 +145,7 @@ export default class Game {
     this.coin.animateCoins(deltaTime);
     this.checkCollisions();
 
-    this.gameScene.updateCamera(); // Update the camera position
+    this.gameScene.updateCamera();
     this.gameScene.render();
   };
 }

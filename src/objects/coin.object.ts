@@ -14,15 +14,16 @@ export default class Coin {
   private coinMeshes: THREE.Mesh[] = [];
 
   constructor(options: CoinOptions = {}) {
-    const { color = 0x0000ff, size = 1, position = new THREE.Vector3(0, 10, 0), mesh, numCoins = 10 } = options;
+    const { color = 0xffd700, size = 0.40, position = new THREE.Vector3(0, 10, 0), mesh, numCoins = 10 } = options;
 
     if (mesh) {
       this.generateCoinsOnMesh(mesh, numCoins, color, size);
     } else {
-      const geometry = new THREE.BoxGeometry(size, size, size);
+      const geometry = new THREE.CylinderGeometry(size, size, 0.1, 32);
       const material = new THREE.MeshStandardMaterial({ color });
       const coinMesh = new THREE.Mesh(geometry, material);
       coinMesh.position.copy(position);
+      coinMesh.rotation.x = Math.PI / 2; // Rotate 90 degrees
       coinMesh.castShadow = true; // Enable casting shadows
       coinMesh.receiveShadow = true; // Enable receiving shadows
       this.coinMeshes.push(coinMesh);
@@ -39,16 +40,17 @@ export default class Coin {
       const y = 0.5;
       const z = getRandomNumber(min.z, max.z);
 
-      const geometry = new THREE.BoxGeometry(size, size, size);
+      const geometry = new THREE.CylinderGeometry(size, size, 0.1, 32);
       const material = new THREE.MeshStandardMaterial({ color });
       const coinMesh = new THREE.Mesh(geometry, material);
       coinMesh.position.set(x, y, z);
+      coinMesh.rotation.x = Math.PI / 2; // Rotate 90 degrees
       coinMesh.castShadow = true; // Enable casting shadows
       coinMesh.receiveShadow = true; // Enable receiving shadows
 
       const floatSpeed = getRandomNumber(0.02, 0.05);
       const rotationSpeed = getRandomNumber(0.01, 0.03);
-      const floatDirection = Math.random() > 0.5 ? 1 : -1; 
+      const floatDirection = 0.40; 
       const rotationDirection = Math.random() > 0.5 ? 1 : -1; 
 
       coinMesh.userData = {
@@ -73,8 +75,8 @@ export default class Coin {
       }
 
       const { rotationSpeed, rotationDirection, offset } = coinMesh.userData;
-      coinMesh.rotation.y += rotationSpeed * rotationDirection;
-      coinMesh.rotation.y += offset * deltaTime; 
+      coinMesh.rotation.z += rotationSpeed * rotationDirection;
+      coinMesh.rotation.z += offset * deltaTime; 
     });
   }
 
